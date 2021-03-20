@@ -3,13 +3,12 @@
 #
 # Last updated: Sujin Lee, 2021 March
 #
-# ÀÌ¿ë ¹æ¹ı:
-#   - eTL¿¡¼­ °úÁ¦ ÀüÃ¼¸¦ ´Ù¿î ¹ŞÀº ÈÄ ±İÀ¶°æÁ¦¼¼¹Ì³ª Æú´õ¿¡ "hw_due(³¯Â¥)"¸¦ ¸¸µé¾î ¿©±â¿¡ ¾ĞÃâ Ç®±â  
-#   - µ¥ÀÌÅÍ ºÒ·¯µéÀÌ´Â °æ·Î´Â °¢ÀÚ Ãß°¡ÇÏ¸é µÊ.
-#   - 3¿ù 17ÀÏ versionÀ» º¹ºÙ ÈÄ ´ÙÀ½ »çÇ×µé º¯°æ;
-#        1) ³¯Â¥ °ü·Ã march17, "2021-03-17", "0317"
-#        2) °úÁ¦ Á¦Ãâ ´ë»ó Á¶ ¹Ù²Ù±â
-#        3) ¸éÁ¦ÀÚ ÀÌ¸§ º¯°æ 
+# How to use:
+#   - Download all the assignments and save in a new folder named "hw_due(date)" 
+#   - Copy and Paste 3/17 and modify the followings: 
+#        1) date march17, "2021-03-17", "0317"
+#        2) groups that need to hand in the homework
+#        3) students who are exempt from handing in hw
 # ****************************************
 
 # install.packages("pacman")
@@ -17,36 +16,34 @@ library(pacman)
 p_load("tidylog", "tidyverse", "readxl", "magrittr", "stringr", "data.table", "lubridate", "writexl")
 
 
-#### ÀüÃ¼ ÇĞ»ı ¸ñ·Ï ºÒ·¯¿À±â ####
+#### List of all students ####
 
-list <- read_excel("G:/°øÀ¯ µå¶óÀÌºê/±İÀ¶°æÁ¦¼¼¹Ì³ª/participants_list.xlsx")
-# ÀÌ¼öÁø, ±èÇü¼® °æ·Î
+list <- read_excel("G:/ê³µìœ  ë“œë¼ì´ë¸Œ/class name/participants_list.xlsx")
 
 list <- list[-1]
 colnames(list) <- c("major", "id", "name", "type", "email", "hp")
 
 students <- list %>%
-  filter(type == "ÇĞ»ı") %>%
+  filter(type == "í•™ìƒ") %>%
   dplyr::select(major, id, name)
-# ÇĞ»ı¸¸ filter. (Á¶±³, ±³¼ö µî Á¦¿Ü)
+# filter only students
 
 students %<>% 
   mutate(
     grp = case_when(
-      id >= "2012-10246" & id <= "2015-16499" ~ 1,
-      id >= "2015-17074" & id <= "2016-17675" ~ 2,
-      id >= "2016-18836" & id <= "2017-15863" ~ 3,
-      id >= "2017-15950" & id <= "2018-18073" ~ 4,
-      id >= "2018-18100" & id <= "2021-90349" ~ 5,
+      id >= "2012-xxxxx" & id <= "2015-xxxxx" ~ 1,
+      id >= "2015-xxxxx" & id <= "2016-xxxxx" ~ 2,
+      id >= "2016-xxxxx" & id <= "2017-xxxxx" ~ 3,
+      id >= "2017-xxxxx" & id <= "2018-xxxxx" ~ 4,
+      id >= "2018-xxxxx" & id <= "2021-xxxxx" ~ 5,
       TRUE ~ NA_real_)
   )
-# °úÁ¦ Á¶´Â "grp"
+# group students
 
 
 ##### due 3/17 ####
 
-hw <- list.files("G:/°øÀ¯ µå¶óÀÌºê/±İÀ¶°æÁ¦¼¼¹Ì³ª/hw_due0317/")
-# eTL¿¡¼­ ¹ŞÀº ÆÄÀÏ ¾ÈÀÇ ÆÄÀÏ¸í ºÒ·¯¿À±â
+hw <- list.files("G:/ê³µìœ  ë“œë¼ì´ë¸Œ/class name/hw_due0317/")
 
 hw2 <- str_split_fixed(hw, "_", n = 3)[, 1:2]
 
@@ -64,59 +61,17 @@ students %<>%
   mutate(
     due_0317 = case_when(
       grp %in% c(2:3) & is.na(due_0317) ~ "1", 
-      # 3/17 Á¦Ãâ ´ë»ó Á¶ÀÎµ¥ ¹ÌÁ¦ÃâÀÌ¸é 1, Á¦Ãâ ´ë»ó ¾Æ´Ï¸é NA
+      # 3/17 ì œì¶œ ëŒ€ìƒ ì¡°ì¸ë° ë¯¸ì œì¶œì´ë©´ 1, ì œì¶œ ëŒ€ìƒ ì•„ë‹ˆë©´ NA
       TRUE ~ as.character(due_0317)
       ),
     due_0317 = case_when(
-      name %in% c("À±ÇöÁö", "¹éÃ¢ÇÏ", "ÀÌµ¿¿¬", "³ë¼­Èñ", "¹éÁöÈÆ", "ÀÌÈ£ÁØ", "¼Û±â¿ì", "¹ÚµµÀ±", "ÃÖÀçÇõ", "±è¼º±Õ", "¿°¼¼Àº", "°í°æ¿¬", "ÇÑÁØÈñ", "³²¼öÇö") ~ "¸éÁ¦",
-      # ¸éÁ¦ÀÚ
+      name %in% c("name of students") ~ "ë©´ì œ",
+      # ë©´ì œì
       TRUE ~ as.character(due_0317)
     )
   )
 
-write_xlsx(students, "G:/°øÀ¯ µå¶óÀÌºê/±İÀ¶°æÁ¦¼¼¹Ì³ª/hw_due0317.xlsx")
-# hw_due0317.xlsx¿¡¼­ °úÁ¦ Æò°¡ ÈÄ score_0317¿¡ Á¡¼ö ±âÀÔ ÈÄ hw_due0317_scored.xlsx·Î ÀúÀåÇÏ±â
-
-
-#### due 3/24 ####
-
-hw <- list.files("G:/°øÀ¯ µå¶óÀÌºê/±İÀ¶°æÁ¦¼¼¹Ì³ª/hw_due0324/")
-
-hw2 <- str_split_fixed(hw, "_", n = 3)[, 1:2]
-
-colnames(hw2) <- c("name", "id")
-
-hw2 %<>% as.data.frame() %>%
-  mutate(
-    due_0324 = 0, 
-    score_0324 = NA
-  )
-
-students %<>% left_join(., hw2, by = c("id", "name"))
-
-students %<>% 
-  mutate(
-    due_0324 = case_when(
-      grp %in% c(1, 4) & is.na(due_0324) ~ 1, 
-      TRUE ~ as.numeric(due_0317)
-    ),
-    due_0324 = case_when(
-      grp %in% c(1, 4) & name %in% c("±è¿øÀç", "¿°¼¼Àº", "ÀÌÈ£ÁØ", "Á¶Ç×ÁØ", "¹éÃ¢ÇÏ", "°íÅÂÇü", "Â÷µ¿°æ", "ÃÖÀçÇõ", "¹éÁöÈÆ", "À±ÇöÁö", "ÃÖÇöÀç", "±èÀçÇö", "³²¼ö¿¬", "ÀÌº¸¿¬", "°­Áø±¸", "°­¼ºÇÑ", "ÃÖ¼±", "¼Û±â¿ì") ~ 0,
-      TRUE ~ as.numeric(due_0324)
-    )
-  )
-
-write_xlsx(students, "G:/°øÀ¯ µå¶óÀÌºê/±İÀ¶°æÁ¦¼¼¹Ì³ª/hw_due0324.xlsx")
-
-
-
-
-
-
-
-#### Æò°¡ÇÑ °úÁ¦ Á¡¼ö ÆÄÀÏµé ÇÕÄ¡±â ####
-
-score <- list.files(path = "G:/°øÀ¯ µå¶óÀÌºê/±İÀ¶°æÁ¦¼¼¹Ì³ª/", pattern = "_scored.xlsx$")
-
+write_xlsx(students, "G:/ê³µìœ  ë“œë¼ì´ë¸Œ/class name/hw_due0317.xlsx")
+# insert the scores of each student in hw_due0317.xlsx and save it to  "hw_due0317_scored.xlsx"
 
 
